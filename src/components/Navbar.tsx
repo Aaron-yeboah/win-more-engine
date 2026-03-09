@@ -15,10 +15,8 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
       <div className="container flex items-center justify-between h-16">
-        <a href="/" className="flex items-center gap-2 font-display font-bold text-xl">
-          <TrendingUp className="h-6 w-6 text-primary" />
-          <span>OG</span>
-          <span className="text-primary">ODDS</span>
+        <a href="/" className="flex items-center">
+          <img src={ogoddsLogo} alt="OGODDS Logo" className="h-10 w-auto object-contain" />
         </a>
 
         {/* Desktop */}
