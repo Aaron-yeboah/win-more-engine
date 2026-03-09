@@ -58,13 +58,9 @@ const VipPricing = () => {
                 ))}
               </ul>
               <Button
-                className={`w-full font-display font-semibold ${
-                  plan.accent
-                    ? "bg-accent text-accent-foreground hover:bg-accent/90"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90"
-                }`}
+                className="w-full font-display font-semibold bg-accent text-accent-foreground hover:bg-accent/90"
               >
-                Get {plan.name}
+                Pay GH₵50 — Unlock VIP
               </Button>
             </motion.div>
           ))}
