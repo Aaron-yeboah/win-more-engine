@@ -24,7 +24,7 @@ const VipPricing = () => {
           <p className="text-muted-foreground">Pay GH₵50 to unlock all VIP tips</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div className="flex justify-center max-w-md mx-auto">
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}
