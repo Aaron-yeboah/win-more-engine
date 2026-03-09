@@ -4,28 +4,12 @@ import { Button } from "@/components/ui/button";
 
 const plans = [
   {
-    name: "Daily Pass",
-    price: "$5",
-    period: "/day",
-    icon: Zap,
-    features: ["All VIP tips for 24hrs", "Booking codes included", "Telegram access"],
-    accent: false,
-  },
-  {
-    name: "Weekly Gold",
-    price: "$25",
-    period: "/week",
+    name: "VIP Access",
+    price: "GH₵50",
+    period: "",
     icon: Crown,
-    features: ["All VIP tips for 7 days", "Priority support", "Booking codes included", "Telegram VIP group"],
+    features: ["All VIP tips", "Booking codes included", "Telegram VIP group", "Priority support", "Early access to picks"],
     accent: true,
-  },
-  {
-    name: "Monthly Platinum",
-    price: "$75",
-    period: "/month",
-    icon: Star,
-    features: ["Unlimited VIP tips", "1-on-1 support", "Early access to picks", "Telegram VIP group", "Bankroll management tips"],
-    accent: false,
   },
 ];
 
