@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Menu, X, TrendingUp } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ogoddsLogo from "@/assets/ogodds-logo.png";
 
 const navLinks = [
   { label: "Free Tips", href: "#tips" },
