@@ -37,14 +37,18 @@ const HeroSection = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Button size="lg" className="text-lg px-8 py-6 font-display font-semibold bg-primary text-primary-foreground hover:bg-primary/90 glow-success">
-              <TrendingUp className="mr-2 h-5 w-5" />
-              Join Telegram
-            </Button>
-            <Button size="lg" variant="outline" className="text-lg px-8 py-6 font-display font-semibold border-accent text-accent hover:bg-accent/10 glow-gold">
-              <Trophy className="mr-2 h-5 w-5" />
-              Go VIP
-            </Button>
+            <a href="https://t.me/ogodds1" target="_blank" rel="noopener noreferrer">
+              <Button size="lg" className="text-lg px-8 py-6 font-display font-semibold bg-primary text-primary-foreground hover:bg-primary/90 glow-success">
+                <TrendingUp className="mr-2 h-5 w-5" />
+                Join Telegram
+              </Button>
+            </a>
+            <a href="#vip">
+              <Button size="lg" variant="outline" className="text-lg px-8 py-6 font-display font-semibold border-accent text-accent hover:bg-accent/10 glow-gold">
+                <Trophy className="mr-2 h-5 w-5" />
+                Go VIP — GH₵50
+              </Button>
+            </a>
           </div>
         </motion.div>
 

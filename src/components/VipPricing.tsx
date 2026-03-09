@@ -4,28 +4,12 @@ import { Button } from "@/components/ui/button";
 
 const plans = [
   {
-    name: "Daily Pass",
-    price: "$5",
-    period: "/day",
-    icon: Zap,
-    features: ["All VIP tips for 24hrs", "Booking codes included", "Telegram access"],
-    accent: false,
-  },
-  {
-    name: "Weekly Gold",
-    price: "$25",
-    period: "/week",
+    name: "VIP Access",
+    price: "GH₵50",
+    period: "",
     icon: Crown,
-    features: ["All VIP tips for 7 days", "Priority support", "Booking codes included", "Telegram VIP group"],
+    features: ["All VIP tips", "Booking codes included", "Telegram VIP group", "Priority support", "Early access to picks"],
     accent: true,
-  },
-  {
-    name: "Monthly Platinum",
-    price: "$75",
-    period: "/month",
-    icon: Star,
-    features: ["Unlimited VIP tips", "1-on-1 support", "Early access to picks", "Telegram VIP group", "Bankroll management tips"],
-    accent: false,
   },
 ];
 
@@ -37,10 +21,10 @@ const VipPricing = () => {
           <h2 className="text-3xl md:text-4xl font-bold font-display mb-2">
             Unlock <span className="text-gradient-gold">VIP Access</span>
           </h2>
-          <p className="text-muted-foreground">Choose the plan that fits your game</p>
+          <p className="text-muted-foreground">Pay GH₵50 to unlock all VIP tips</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div className="flex justify-center max-w-md mx-auto">
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}
@@ -74,13 +58,9 @@ const VipPricing = () => {
                 ))}
               </ul>
               <Button
-                className={`w-full font-display font-semibold ${
-                  plan.accent
-                    ? "bg-accent text-accent-foreground hover:bg-accent/90"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90"
-                }`}
+                className="w-full font-display font-semibold bg-accent text-accent-foreground hover:bg-accent/90"
               >
-                Get {plan.name}
+                Pay GH₵50 — Unlock VIP
               </Button>
             </motion.div>
           ))}
