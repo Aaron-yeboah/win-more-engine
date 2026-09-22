@@ -24,7 +24,6 @@ export default function Access() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [momo, setMomo] = useState("");
   const requested = (location.state as LocationState | null)?.from;
 
   if (!loading && user) return <Navigate to={isAdmin ? "/admin" : requested || "/vip"} replace />;
@@ -48,18 +47,17 @@ export default function Access() {
   const signUp = async (event: React.FormEvent) => {
     event.preventDefault();
     const normalized = normalizeGhanaPhone(phone);
-    const normalizedMomo = normalizeGhanaPhone(momo);
     const validName = nameSchema.safeParse(name);
     const validPassword = passwordSchema.safeParse(password);
-    if (!validName.success || !normalized || !normalizedMomo || !validPassword.success) {
-      toast.error(validName.error?.issues[0]?.message || (!normalized || !normalizedMomo ? "Enter valid Ghana mobile numbers" : validPassword.error?.issues[0]?.message));
+    if (!validName.success || !normalized || !validPassword.success) {
+      toast.error(validName.error?.issues[0]?.message || (!normalized ? "Enter a valid Ghana mobile number" : validPassword.error?.issues[0]?.message));
       return;
     }
     setBusy(true);
     const { error } = await supabase.auth.signUp({
       email: phoneEmail(normalized),
       password,
-      options: { data: { full_name: validName.data, phone_number: normalized, momo_number: normalizedMomo } },
+      options: { data: { full_name: validName.data, phone_number: normalized, momo_number: normalized } },
     });
     setBusy(false);
     if (error) return toast.error(error.message.includes("already") ? "This phone number already has an account" : error.message);
