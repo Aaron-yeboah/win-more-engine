@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { TrendingUp, Target, Trophy, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import shieldLogo from "@/assets/dexecutive-shield-logo.png";
 
 const stats = [
   { icon: Target, label: "Accuracy", value: "92%", sub: "This Week" },
