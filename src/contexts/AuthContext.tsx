@@ -8,7 +8,7 @@ type AuthContextValue = {
   loading: boolean;
   isAdmin: boolean;
   isVip: boolean;
-  refreshAccess: () => Promise<void>;
+  refreshAccess: (userId?: string) => Promise<{ isAdmin: boolean; isVip: boolean }>;
   signOut: () => Promise<void>;
 };
 
@@ -24,14 +24,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!userId) {
       setIsAdmin(false);
       setIsVip(false);
-      return;
+      return { isAdmin: false, isVip: false };
     }
     const [{ data: roles }, { data: membership }] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", userId),
       supabase.from("vip_memberships").select("active").eq("user_id", userId).maybeSingle(),
     ]);
-    setIsAdmin(Boolean(roles?.some((item) => item.role === "admin")));
-    setIsVip(Boolean(membership?.active));
+    const nextIsAdmin = Boolean(roles?.some((item) => item.role === "admin"));
+    const nextIsVip = Boolean(membership?.active);
+    setIsAdmin(nextIsAdmin);
+    setIsVip(nextIsVip);
+    return { isAdmin: nextIsAdmin, isVip: nextIsVip };
   };
 
   useEffect(() => {
@@ -58,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     isAdmin,
     isVip,
-    refreshAccess: () => loadAccess(session?.user.id),
+    refreshAccess: (userId?: string) => loadAccess(userId ?? session?.user.id),
     signOut: async () => { await supabase.auth.signOut(); },
   }), [session, loading, isAdmin, isVip]);
 

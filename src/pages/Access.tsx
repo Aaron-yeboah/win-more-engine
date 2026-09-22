@@ -17,7 +17,7 @@ const nameSchema = z.string().trim().min(2, "Enter your full name").max(100);
 type LocationState = { from?: string };
 
 export default function Access() {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, loading, refreshAccess } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [busy, setBusy] = useState(false);
@@ -41,8 +41,8 @@ export default function Access() {
     const { data, error } = await supabase.auth.signInWithPassword({ email: phoneEmail(normalized), password });
     setBusy(false);
     if (error) return toast.error("Phone number or password is incorrect");
-    const { data: role } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id).eq("role", "admin").maybeSingle();
-    navigate(role ? "/admin" : requested || "/vip", { replace: true });
+    const access = await refreshAccess(data.user.id);
+    navigate(access.isAdmin ? "/admin" : requested || "/vip", { replace: true });
   };
 
   const signUp = async (event: React.FormEvent) => {
