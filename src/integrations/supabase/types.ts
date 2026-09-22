@@ -74,6 +74,39 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_details: {
+        Row: {
+          amount: number
+          id: boolean
+          instructions: string
+          momo_name: string
+          momo_number: string
+          network: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          amount?: number
+          id?: boolean
+          instructions?: string
+          momo_name?: string
+          momo_number?: string
+          network?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          amount?: number
+          id?: boolean
+          instructions?: string
+          momo_name?: string
+          momo_number?: string
+          network?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

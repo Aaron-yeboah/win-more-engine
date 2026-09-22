@@ -22,6 +22,13 @@
       "when": 1790110365798,
       "tag": "0002_create_app_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790112358827,
+      "tag": "0003_create_payment_details",
+      "breakpoints": true
     }
   ]
 }
