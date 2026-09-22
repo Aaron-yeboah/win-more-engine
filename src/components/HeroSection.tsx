@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { TrendingUp, Target, Trophy, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import shieldLogo from "@/assets/dexecutive-shield-logo.png.asset.json";
 
 const stats = [
   { icon: Target, label: "Accuracy", value: "92%", sub: "This Week" },
@@ -22,6 +23,14 @@ const HeroSection = () => {
           transition={{ duration: 0.6 }}
           className="text-center max-w-3xl mx-auto"
         >
+          <motion.img
+            src={shieldLogo.url}
+            alt="D’EXECUTIVE shield"
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+            className="mx-auto mb-7 h-32 w-32 object-contain drop-shadow-2xl sm:h-40 sm:w-40"
+          />
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 mb-6">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse-glow" />
             <span className="text-sm font-medium text-primary">Live Predictions Active</span>

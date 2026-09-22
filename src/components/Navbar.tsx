@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import ogoddsLogo from "@/assets/ogodds-logo.png";
+import horizontalLogo from "@/assets/dexecutive-horizontal-logo.png.asset.json";
 import { Link } from "react-router-dom";
 
 const navLinks = [
@@ -14,10 +14,10 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
-      <div className="container flex items-center justify-between h-16">
-        <a href="/" className="flex items-center">
-          <img src={ogoddsLogo} alt="D’EXECUTIVE" className="h-10 w-auto object-contain" />
+    <nav className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-xl">
+      <div className="container flex h-20 items-center justify-between">
+        <a href="/" className="flex min-w-0 items-center" aria-label="D’EXECUTIVE home">
+          <img src={horizontalLogo.url} alt="D’EXECUTIVE — Football Analytics & Prediction" className="h-auto w-[230px] max-w-[70vw] object-contain sm:w-[270px]" />
         </a>
 
         {/* Desktop */}
