@@ -27,6 +27,33 @@ export default function AdminPortal() {
   const [commission, setCommission] = useState(10);
   const [commissionInput, setCommissionInput] = useState("10");
   const [savingCommission, setSavingCommission] = useState(false);
+  const [payName, setPayName] = useState("");
+  const [payNumber, setPayNumber] = useState("");
+  const [payNetwork, setPayNetwork] = useState("MTN");
+  const [payAmount, setPayAmount] = useState("50");
+  const [payNote, setPayNote] = useState("");
+  const [savingDetails, setSavingDetails] = useState(false);
+
+  const saveDetails = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const valid = z.object({ momo_name: z.string().trim().min(2).max(100), momo_number: z.string().trim().min(9).max(20) }).safeParse({ momo_name: payName, momo_number: payNumber });
+    if (!valid.success) return toast.error("Enter the Mobile Money name and number");
+    const amount = Number(payAmount);
+    if (!Number.isFinite(amount) || amount <= 0) return toast.error("Enter a valid amount");
+    setSavingDetails(true);
+    const { error } = await supabase.from("payment_details").update({
+      momo_name: valid.data.momo_name,
+      momo_number: valid.data.momo_number,
+      network: payNetwork,
+      amount,
+      instructions: payNote.trim(),
+      updated_by: user?.id,
+      updated_at: new Date().toISOString(),
+    }).eq("id", true);
+    setSavingDetails(false);
+    if (error) return toast.error("The payment details could not be saved");
+    toast.success("Payment details saved");
+  };
 
   const load = async () => {
     setLoading(true);
