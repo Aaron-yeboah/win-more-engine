@@ -124,7 +124,7 @@ const PredictionFeed = () => {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleCopy(p.id, p.bookingCode!)}
+                        onClick={() => p.bookingCode && handleCopy(p.id, p.bookingCode)}
                         className="text-xs"
                       >
                         {copiedId === p.id ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}
@@ -169,7 +169,7 @@ const PredictionFeed = () => {
                       {p.odds}
                     </span>
                     {p.bookingCode && (
-                      <Button size="sm" variant="ghost" onClick={() => handleCopy(p.id, p.bookingCode!)} className="text-xs">
+                      <Button size="sm" variant="ghost" onClick={() => p.bookingCode && handleCopy(p.id, p.bookingCode)} className="text-xs">
                         {copiedId === p.id ? <Check className="h-4 w-4 text-primary" /> : <><Copy className="h-4 w-4 mr-1" /> Code</>}
                       </Button>
                     )}

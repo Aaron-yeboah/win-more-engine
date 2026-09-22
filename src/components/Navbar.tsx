@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ogoddsLogo from "@/assets/ogodds-logo.png";
+import { Link } from "react-router-dom";
 
 const navLinks = [
   { label: "Free Tips", href: "#tips" },
@@ -16,7 +17,7 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
       <div className="container flex items-center justify-between h-16">
         <a href="/" className="flex items-center">
-          <img src={ogoddsLogo} alt="OGODDS Logo" className="h-10 w-auto object-contain" />
+          <img src={ogoddsLogo} alt="D’EXECUTIVE" className="h-10 w-auto object-contain" />
         </a>
 
         {/* Desktop */}
@@ -26,9 +27,7 @@ const Navbar = () => {
               {l.label}
             </a>
           ))}
-          <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 font-display">
-            Go VIP
-          </Button>
+          <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 font-display"><Link to="/access">VIP Access</Link></Button>
         </div>
 
         {/* Mobile toggle */}
@@ -45,7 +44,7 @@ const Navbar = () => {
               {l.label}
             </a>
           ))}
-          <Button size="sm" className="w-full bg-primary text-primary-foreground font-display">Go VIP</Button>
+          <Button asChild size="sm" className="w-full bg-primary text-primary-foreground font-display"><Link to="/access" onClick={() => setOpen(false)}>VIP Access</Link></Button>
         </div>
       )}
     </nav>

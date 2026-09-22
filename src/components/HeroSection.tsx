@@ -29,7 +29,7 @@ const HeroSection = () => {
           
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold font-display tracking-tight mb-6">
             Win More with{" "}
-            <span className="text-gradient-success">OGODDS</span>
+            <span className="text-gradient-success">D’EXECUTIVE</span>
           </h1>
           
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
@@ -43,7 +43,7 @@ const HeroSection = () => {
                 Join Telegram
               </Button>
             </a>
-            <a href="#vip">
+            <a href="/access">
               <Button size="lg" variant="outline" className="text-lg px-8 py-6 font-display font-semibold border-accent text-accent hover:bg-accent/10 glow-gold">
                 <Trophy className="mr-2 h-5 w-5" />
                 Go VIP — GH₵50

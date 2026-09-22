@@ -14,16 +14,160 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      payment_confirmations: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          momo_name: string
+          momo_number: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          transaction_reference: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          momo_name: string
+          momo_number: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          transaction_reference: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          momo_name?: string
+          momo_number?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          transaction_reference?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          momo_number: string
+          phone_number: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id: string
+          momo_number: string
+          phone_number: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          momo_number?: string
+          phone_number?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vip_memberships: {
+        Row: {
+          active: boolean
+          approved_at: string
+          approved_by: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          approved_at?: string
+          approved_by: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          approved_at?: string
+          approved_by?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vip_predictions: {
+        Row: {
+          bet_code: string
+          created_at: string
+          created_by: string
+          id: string
+          image_path: string
+          is_active: boolean
+          title: string
+        }
+        Insert: {
+          bet_code: string
+          created_at?: string
+          created_by: string
+          id?: string
+          image_path: string
+          is_active?: boolean
+          title?: string
+        }
+        Update: {
+          bet_code?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          image_path?: string
+          is_active?: boolean
+          title?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      approve_payment: { Args: { _payment_id: string }; Returns: undefined }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      has_vip_access: { Args: { _user_id: string }; Returns: boolean }
+      reject_payment: { Args: { _payment_id: string }; Returns: undefined }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      payment_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +294,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      payment_status: ["pending", "approved", "rejected"],
+    },
   },
 } as const
