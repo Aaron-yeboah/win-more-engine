@@ -24,7 +24,6 @@ export default function Access() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [momo, setMomo] = useState("");
   const requested = (location.state as LocationState | null)?.from;
 
   if (!loading && user) return <Navigate to={isAdmin ? "/admin" : requested || "/vip"} replace />;
@@ -48,18 +47,17 @@ export default function Access() {
   const signUp = async (event: React.FormEvent) => {
     event.preventDefault();
     const normalized = normalizeGhanaPhone(phone);
-    const normalizedMomo = normalizeGhanaPhone(momo);
     const validName = nameSchema.safeParse(name);
     const validPassword = passwordSchema.safeParse(password);
-    if (!validName.success || !normalized || !normalizedMomo || !validPassword.success) {
-      toast.error(validName.error?.issues[0]?.message || (!normalized || !normalizedMomo ? "Enter valid Ghana mobile numbers" : validPassword.error?.issues[0]?.message));
+    if (!validName.success || !normalized || !validPassword.success) {
+      toast.error(validName.error?.issues[0]?.message || (!normalized ? "Enter a valid Ghana mobile number" : validPassword.error?.issues[0]?.message));
       return;
     }
     setBusy(true);
     const { error } = await supabase.auth.signUp({
       email: phoneEmail(normalized),
       password,
-      options: { data: { full_name: validName.data, phone_number: normalized, momo_number: normalizedMomo } },
+      options: { data: { full_name: validName.data, phone_number: normalized, momo_number: normalized } },
     });
     setBusy(false);
     if (error) return toast.error(error.message.includes("already") ? "This phone number already has an account" : error.message);
@@ -89,7 +87,6 @@ export default function Access() {
             <form onSubmit={signUp} className="space-y-4 rounded-lg border border-border bg-card p-6">
               <Field label="Full name" icon={<UserRound className="h-4 w-4" />}><Input autoComplete="name" maxLength={100} value={name} onChange={(e) => setName(e.target.value)} required /></Field>
               <Field label="Mobile number" icon={<Phone className="h-4 w-4" />}><Input inputMode="tel" autoComplete="tel" placeholder="024 000 0000" value={phone} onChange={(e) => setPhone(e.target.value)} required /></Field>
-              <Field label="Mobile Money number" icon={<Phone className="h-4 w-4" />}><Input inputMode="tel" placeholder="024 000 0000" value={momo} onChange={(e) => setMomo(e.target.value)} required /></Field>
               <Field label="Password" icon={<LockKeyhole className="h-4 w-4" />}><Input type="password" autoComplete="new-password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} required /></Field>
               <Button className="w-full" disabled={busy}>{busy && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}Create account</Button>
             </form>

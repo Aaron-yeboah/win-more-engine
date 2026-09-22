@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { z } from "zod";
-import { ArrowLeft, Check, Clock3, Copy, Crown, LoaderCircle, LogOut, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Check, Clock3, Copy, Crown, LoaderCircle, LogOut, ShieldCheck, Smartphone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { normalizeGhanaPhone } from "@/lib/phone";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,21 +12,18 @@ import { toast } from "sonner";
 
 type Payment = { id: string; status: "pending" | "approved" | "rejected"; created_at: string };
 type Prediction = { id: string; title: string; bet_code: string; image_path: string; created_at: string; imageUrl?: string };
+type Details = { momo_name: string; momo_number: string; network: string; amount: number; instructions: string };
 
-const paymentSchema = z.object({
-  momoName: z.string().trim().min(2).max(100),
-  momoNumber: z.string().transform(normalizeGhanaPhone).refine(Boolean, "Enter a valid Ghana mobile number"),
-  reference: z.string().trim().min(4).max(80),
-});
+const nameSchema = z.string().trim().min(2, "Enter the Mobile Money name you paid with").max(100);
 
 export default function VipPortal() {
   const { user, isVip, isAdmin, refreshAccess, signOut } = useAuth();
   const [loading, setLoading] = useState(true);
   const [payment, setPayment] = useState<Payment | null>(null);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const [details, setDetails] = useState<Details | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
   const [momoName, setMomoName] = useState("");
-  const [momoNumber, setMomoNumber] = useState("");
-  const [reference, setReference] = useState("");
   const [sending, setSending] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -35,8 +31,12 @@ export default function VipPortal() {
     if (!user) return;
     setLoading(true);
     await refreshAccess();
-    const { data: payments } = await supabase.from("payment_confirmations").select("id,status,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1);
+    const [{ data: payments }, { data: paymentDetails }] = await Promise.all([
+      supabase.from("payment_confirmations").select("id,status,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1),
+      supabase.from("payment_details").select("momo_name,momo_number,network,amount,instructions").maybeSingle(),
+    ]);
     setPayment((payments?.[0] as Payment | undefined) ?? null);
+    setDetails(paymentDetails ? ({ ...paymentDetails, amount: Number(paymentDetails.amount) } as Details) : null);
     if (isVip || isAdmin) {
       const { data } = await supabase.from("vip_predictions").select("id,title,bet_code,image_path,created_at").eq("is_active", true).order("created_at", { ascending: false });
       const withUrls = await Promise.all((data ?? []).map(async (item) => {
@@ -53,26 +53,30 @@ export default function VipPortal() {
   const submitPayment = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!user) return;
-    const parsed = paymentSchema.safeParse({ momoName, momoNumber, reference });
-    if (!parsed.success || !parsed.data.momoNumber) return toast.error(parsed.error?.issues[0]?.message || "Check your payment details");
+    const parsed = nameSchema.safeParse(momoName);
+    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message);
     setSending(true);
     const { error } = await supabase.from("payment_confirmations").insert({
       user_id: user.id,
-      momo_name: parsed.data.momoName,
-      momo_number: parsed.data.momoNumber,
-      transaction_reference: parsed.data.reference,
+      momo_name: parsed.data,
+      momo_number: details?.momo_number ?? "",
+      transaction_reference: "I HAVE PAID",
+      amount: details?.amount ?? 50,
     });
     setSending(false);
-    if (error) return toast.error(error.code === "23505" ? "You already have a payment awaiting review" : "Payment confirmation could not be sent");
-    toast.success("Payment submitted for confirmation");
+    if (error) return toast.error(error.code === "23505" ? "You already have a payment awaiting review" : "Your confirmation could not be sent");
+    toast.success("Sent — please wait for admin approval");
     void load();
   };
 
-  const copyCode = async (id: string, code: string) => {
-    await navigator.clipboard.writeText(code);
+  const copyValue = async (id: string, value: string) => {
+    await navigator.clipboard.writeText(value);
     setCopied(id);
     window.setTimeout(() => setCopied(null), 1800);
   };
+
+  const amount = details?.amount ?? 50;
+  const cedis = `GH₵${amount.toFixed(0)}`;
 
   return (
     <main className="min-h-screen bg-background">
@@ -81,17 +85,52 @@ export default function VipPortal() {
         {loading ? <div className="grid min-h-72 place-items-center"><LoaderCircle className="h-8 w-8 animate-spin text-primary" /></div> : isVip || isAdmin ? (
           <section>
             <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><Badge className="mb-3 bg-primary/15 text-primary"><ShieldCheck className="mr-1 h-3 w-3" /> Access confirmed</Badge><h1 className="text-3xl font-bold md:text-4xl">VIP football predictions</h1><p className="mt-2 text-muted-foreground">Your latest paid selections and BET codes.</p></div>{isAdmin && <Button asChild variant="outline"><Link to="/admin">Open admin portal</Link></Button>}</div>
-            {predictions.length === 0 ? <div className="border-y border-border py-16 text-center"><Clock3 className="mx-auto mb-3 h-8 w-8 text-accent" /><h2 className="text-xl font-semibold">Next prediction coming soon</h2><p className="mt-2 text-sm text-muted-foreground">You have access. Check back for the next upload.</p></div> : <div className="grid gap-6 md:grid-cols-2">{predictions.map((item) => <article key={item.id} className="overflow-hidden rounded-lg border border-border bg-card"><div className="aspect-[4/3] bg-secondary">{item.imageUrl && <img src={item.imageUrl} alt={item.title} className="h-full w-full object-contain" />}</div><div className="p-5"><p className="text-xs text-muted-foreground">{new Date(item.created_at).toLocaleDateString("en-GH", { dateStyle: "medium" })}</p><h2 className="mt-1 text-xl font-bold">{item.title}</h2><div className="mt-4 flex items-center justify-between rounded-md border border-primary/30 bg-primary/10 px-4 py-3"><div><p className="text-xs uppercase text-muted-foreground">BET code</p><p className="text-lg font-bold text-primary">{item.bet_code}</p></div><Button size="icon" variant="ghost" aria-label="Copy BET code" onClick={() => void copyCode(item.id, item.bet_code)}>{copied === item.id ? <Check className="h-5 w-5 text-primary" /> : <Copy className="h-5 w-5" />}</Button></div></div></article>)}</div>}
+            {predictions.length === 0 ? <div className="border-y border-border py-16 text-center"><Clock3 className="mx-auto mb-3 h-8 w-8 text-accent" /><h2 className="text-xl font-semibold">Next prediction coming soon</h2><p className="mt-2 text-sm text-muted-foreground">You have access. Check back for the next upload.</p></div> : <div className="grid gap-6 md:grid-cols-2">{predictions.map((item) => <article key={item.id} className="overflow-hidden rounded-lg border border-border bg-card"><div className="aspect-[4/3] bg-secondary">{item.imageUrl && <img src={item.imageUrl} alt={item.title} className="h-full w-full object-contain" />}</div><div className="p-5"><p className="text-xs text-muted-foreground">{new Date(item.created_at).toLocaleDateString("en-GH", { dateStyle: "medium" })}</p><h2 className="mt-1 text-xl font-bold">{item.title}</h2><div className="mt-4 flex items-center justify-between rounded-md border border-primary/30 bg-primary/10 px-4 py-3"><div><p className="text-xs uppercase text-muted-foreground">BET code</p><p className="text-lg font-bold text-primary">{item.bet_code}</p></div><Button size="icon" variant="ghost" aria-label="Copy BET code" onClick={() => void copyValue(item.id, item.bet_code)}>{copied === item.id ? <Check className="h-5 w-5 text-primary" /> : <Copy className="h-5 w-5" />}</Button></div></div></article>)}</div>}
+          </section>
+        ) : payment?.status === "pending" ? (
+          <section className="mx-auto max-w-xl text-center">
+            <div className="rounded-lg border border-accent/30 bg-accent/10 p-8"><Clock3 className="mx-auto mb-3 h-8 w-8 text-accent" /><h1 className="text-2xl font-bold">Waiting for admin approval</h1><p className="mt-2 text-sm text-muted-foreground">We received your payment confirmation. As soon as the admin approves it, the prediction picture and BET code will appear here.</p><Button variant="outline" className="mt-6" onClick={() => void load()}>Check again</Button></div>
+          </section>
+        ) : !showPayment ? (
+          <section className="mx-auto max-w-xl text-center">
+            <Badge className="mb-4 bg-accent/15 text-accent">{cedis} VIP access</Badge>
+            <h1 className="text-3xl font-bold md:text-4xl">Unlock the VIP predictions</h1>
+            <p className="mt-3 text-muted-foreground">Pay {cedis} by Mobile Money to see the daily prediction picture and BET code.</p>
+            {payment?.status === "rejected" && <p className="mt-4 text-sm text-destructive">Your last confirmation was not verified. Please pay again and resubmit.</p>}
+            <Button size="lg" className="mt-8 w-full sm:w-auto" onClick={() => setShowPayment(true)}>Pay {cedis} — Unlock VIP</Button>
           </section>
         ) : (
           <section className="mx-auto max-w-xl">
-            <Badge className="mb-4 bg-accent/15 text-accent">GH₵50 VIP access</Badge>
-            <h1 className="text-3xl font-bold md:text-4xl">Confirm your Mobile Money payment</h1>
-            <p className="mt-3 text-muted-foreground">After paying GH₵50, submit the payer details below. The admin will verify the transaction and unlock this page.</p>
-            {payment?.status === "pending" ? <div className="mt-8 rounded-lg border border-accent/30 bg-accent/10 p-6"><Clock3 className="mb-3 h-7 w-7 text-accent" /><h2 className="text-xl font-bold">Confirmation pending</h2><p className="mt-2 text-sm text-muted-foreground">Your payment details are with the admin. Access will appear here after approval.</p></div> : <form onSubmit={submitPayment} className="mt-8 space-y-5 rounded-lg border border-border bg-card p-6"><div className="space-y-2"><Label>Mobile Money account name</Label><Input maxLength={100} value={momoName} onChange={(e) => setMomoName(e.target.value)} required /></div><div className="space-y-2"><Label>Mobile Money number used</Label><Input inputMode="tel" placeholder="024 000 0000" value={momoNumber} onChange={(e) => setMomoNumber(e.target.value)} required /></div><div className="space-y-2"><Label>Transaction reference</Label><Input maxLength={80} value={reference} onChange={(e) => setReference(e.target.value)} required /></div>{payment?.status === "rejected" && <p className="text-sm text-destructive">The previous confirmation was not verified. Check the details and submit again.</p>}<Button className="w-full" disabled={sending}>{sending && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}Submit for confirmation</Button></form>}
+            <button onClick={() => setShowPayment(false)} className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> Back</button>
+            <Badge className="mb-4 bg-accent/15 text-accent">Step 1 — Send {cedis}</Badge>
+            <h1 className="text-2xl font-bold md:text-3xl">Payment details</h1>
+            {details?.momo_number ? (
+              <div className="mt-6 space-y-4 rounded-lg border border-border bg-card p-6">
+                <DetailRow label="Mobile Money name" value={details.momo_name} />
+                <div className="flex items-end justify-between gap-3 rounded-md border border-primary/30 bg-primary/10 px-4 py-3">
+                  <div><p className="text-xs uppercase text-muted-foreground">Mobile Money number ({details.network})</p><p className="text-lg font-bold text-primary">{details.momo_number}</p></div>
+                  <Button size="icon" variant="ghost" aria-label="Copy Mobile Money number" onClick={() => void copyValue("momo", details.momo_number)}>{copied === "momo" ? <Check className="h-5 w-5 text-primary" /> : <Copy className="h-5 w-5" />}</Button>
+                </div>
+                <DetailRow label="Network" value={details.network} />
+                <DetailRow label="Amount" value={`GH₵${amount.toFixed(2)}`} />
+                {details.instructions && <p className="text-sm text-muted-foreground">{details.instructions}</p>}
+              </div>
+            ) : (
+              <div className="mt-6 rounded-lg border border-border bg-card p-6 text-sm text-muted-foreground"><Smartphone className="mb-3 h-6 w-6 text-accent" />The payment number has not been added yet. Please check back shortly.</div>
+            )}
+            <form onSubmit={submitPayment} className="mt-6 space-y-5 rounded-lg border border-border bg-card p-6">
+              <Badge className="bg-primary/15 text-primary">Step 2 — Confirm</Badge>
+              <div className="space-y-2"><Label>Your Mobile Money name</Label><Input maxLength={100} placeholder="Name on the account you paid from" value={momoName} onChange={(e) => setMomoName(e.target.value)} required /></div>
+              <Button className="w-full" disabled={sending}>{sending && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}I have paid</Button>
+              <p className="text-xs text-muted-foreground">After you submit, wait for the admin to approve your payment.</p>
+            </form>
           </section>
         )}
       </div>
     </main>
   );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return <div className="flex items-center justify-between gap-3 border-b border-border pb-3 last:border-0"><span className="text-sm text-muted-foreground">{label}</span><span className="font-semibold">{value || "—"}</span></div>;
 }
