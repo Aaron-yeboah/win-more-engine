@@ -24,13 +24,21 @@ export default function AdminPortal() {
   const [title, setTitle] = useState("VIP Football Prediction");
   const [betCode, setBetCode] = useState("");
   const [image, setImage] = useState<File | null>(null);
+  const [commission, setCommission] = useState(10);
+  const [commissionInput, setCommissionInput] = useState("10");
+  const [savingCommission, setSavingCommission] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    const [{ data: paymentRows }, { data: predictionRows }] = await Promise.all([
+    const [{ data: paymentRows }, { data: predictionRows }, { data: settings }] = await Promise.all([
       supabase.from("payment_confirmations").select("*").order("created_at", { ascending: false }),
       supabase.from("vip_predictions").select("*").order("created_at", { ascending: false }),
+      supabase.from("app_settings").select("dev_commission_percent").maybeSingle(),
     ]);
+    if (settings) {
+      setCommission(Number(settings.dev_commission_percent));
+      setCommissionInput(String(Number(settings.dev_commission_percent)));
+    }
     const userIds = [...new Set((paymentRows ?? []).map((item) => item.user_id))];
     const { data: profiles } = userIds.length ? await supabase.from("profiles").select("id,full_name").in("id", userIds) : { data: [] };
     const nameMap = new Map((profiles ?? []).map((profile) => [profile.id, profile.full_name]));
