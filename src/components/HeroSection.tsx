@@ -37,7 +37,7 @@ const HeroSection = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <a href="https://t.me/ogodds1" target="_blank" rel="noopener noreferrer">
+            <a href="https://t.me/dexecu" target="_blank" rel="noopener noreferrer">
               <Button size="lg" className="text-lg px-8 py-6 font-display font-semibold bg-primary text-primary-foreground hover:bg-primary/90 glow-success">
                 <TrendingUp className="mr-2 h-5 w-5" />
                 Join Telegram
