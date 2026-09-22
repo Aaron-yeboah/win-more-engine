@@ -1,13 +1,12 @@
-import { TrendingUp } from "lucide-react";
+import horizontalLogo from "@/assets/dexecutive-horizontal-logo.png";
 
 const Footer = () => {
   return (
     <footer className="border-t border-border py-8">
       <div className="container flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2 font-display font-bold">
-          <TrendingUp className="h-5 w-5 text-primary" />
-          <span>D’<span className="text-primary">EXECUTIVE</span></span>
-        </div>
+        <a href="/" aria-label="D’EXECUTIVE home" className="shrink-0">
+          <img src={horizontalLogo} alt="D’EXECUTIVE — Football Analytics & Prediction" className="h-auto w-56 object-contain" />
+        </a>
         <p className="text-sm text-muted-foreground text-center">
           © 2026 D’EXECUTIVE. For entertainment purposes only. Gamble responsibly.
         </p>
