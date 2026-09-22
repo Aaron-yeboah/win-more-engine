@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Check, Crown, Zap, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const plans = [
   {
@@ -57,10 +58,10 @@ const VipPricing = () => {
                   </li>
                 ))}
               </ul>
-              <Button
+              <Button asChild
                 className="w-full font-display font-semibold bg-accent text-accent-foreground hover:bg-accent/90"
               >
-                Pay GH₵50 — Unlock VIP
+                <Link to="/access">Pay GH₵50 — Unlock VIP</Link>
               </Button>
             </motion.div>
           ))}
