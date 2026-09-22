@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
-type Payment = { id: string; user_id: string; momo_name: string; momo_number: string; transaction_reference: string; amount: number; status: "pending" | "approved" | "rejected"; created_at: string; customerName?: string };
+type Payment = { id: string; user_id: string; momo_name: string; momo_number: string; transaction_reference: string; amount: number; status: "pending" | "approved" | "rejected"; created_at: string; reviewed_at?: string | null; customerName?: string };
 type Prediction = { id: string; title: string; bet_code: string; image_path: string; is_active: boolean; created_at: string; imageUrl?: string };
 
 export default function AdminPortal() {
