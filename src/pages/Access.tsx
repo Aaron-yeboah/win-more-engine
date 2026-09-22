@@ -38,10 +38,11 @@ export default function Access() {
       return;
     }
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: phoneEmail(normalized), password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email: phoneEmail(normalized), password });
     setBusy(false);
     if (error) return toast.error("Phone number or password is incorrect");
-    navigate(requested || "/vip", { replace: true });
+    const { data: role } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id).eq("role", "admin").maybeSingle();
+    navigate(role ? "/admin" : requested || "/vip", { replace: true });
   };
 
   const signUp = async (event: React.FormEvent) => {
