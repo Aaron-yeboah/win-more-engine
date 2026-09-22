@@ -57,14 +57,22 @@ export default function AdminPortal() {
 
   const load = async () => {
     setLoading(true);
-    const [{ data: paymentRows }, { data: predictionRows }, { data: settings }] = await Promise.all([
+    const [{ data: paymentRows }, { data: predictionRows }, { data: settings }, { data: payDetails }] = await Promise.all([
       supabase.from("payment_confirmations").select("*").order("created_at", { ascending: false }),
       supabase.from("vip_predictions").select("*").order("created_at", { ascending: false }),
       supabase.from("app_settings").select("dev_commission_percent").maybeSingle(),
+      supabase.from("payment_details").select("*").maybeSingle(),
     ]);
     if (settings) {
       setCommission(Number(settings.dev_commission_percent));
       setCommissionInput(String(Number(settings.dev_commission_percent)));
+    }
+    if (payDetails) {
+      setPayName(payDetails.momo_name);
+      setPayNumber(payDetails.momo_number);
+      setPayNetwork(payDetails.network || "MTN");
+      setPayAmount(String(Number(payDetails.amount)));
+      setPayNote(payDetails.instructions ?? "");
     }
     const userIds = [...new Set((paymentRows ?? []).map((item) => item.user_id))];
     const { data: profiles } = userIds.length ? await supabase.from("profiles").select("id,full_name").in("id", userIds) : { data: [] };
