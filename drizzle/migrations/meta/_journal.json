@@ -8,6 +8,13 @@
       "when": 1790109513686,
       "tag": "0000_create_vip_admin_portal",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790109641694,
+      "tag": "0001_harden_vip_admin_access",
+      "breakpoints": true
     }
   ]
 }
