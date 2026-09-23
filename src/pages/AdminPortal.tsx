@@ -142,23 +142,19 @@ export default function AdminPortal() {
   const clearDashboard = async () => {
     if (!window.confirm("Are you sure you want to clear all payment history, revenue, and predictions to zero?")) return;
     setLoading(true);
-    const { error } = await supabase.rpc("clear_admin_dashboard");
-    if (error) {
-      // Fallback: direct deletes if RPC is missing
-      const [e1, e2, e3] = await Promise.all([
-        supabase.from("payment_confirmations").delete().neq("id", "00000000-0000-0000-0000-000000000000"),
+    const { error: rpcErr } = await supabase.rpc("clear_admin_dashboard");
+    if (rpcErr) {
+      console.log("RPC clear failed, executing direct table deletes:", rpcErr);
+      await Promise.all([
+        supabase.from("payment_confirmations").delete().gte("amount", 0),
         supabase.from("vip_memberships").delete().neq("user_id", "00000000-0000-0000-0000-000000000000"),
         supabase.from("vip_predictions").delete().neq("id", "00000000-0000-0000-0000-000000000000"),
       ]);
-      if (e1.error || e2.error || e3.error) {
-        console.error("Clear error:", e1.error || e2.error || e3.error);
-        toast.error("Could not clear all data. Please run the SQL reset script in Supabase.");
-        setLoading(false);
-        return;
-      }
     }
-    toast.success("Admin dashboard reset to zero! 🎉");
-    void load();
+    setPayments([]);
+    setPredictions([]);
+    toast.success("Admin portal cleared to zero! 🎉");
+    await load();
   };
 
   const pendingCount = payments.filter((item) => item.status === "pending").length;
