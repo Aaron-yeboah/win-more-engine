@@ -27,16 +27,21 @@ export default function VipPortal() {
   const [sending, setSending] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
 
+  const [approvedAt, setApprovedAt] = useState<string | null>(null);
+
   const load = async () => {
     if (!user) return;
     setLoading(true);
     await refreshAccess();
-    const [{ data: payments }, { data: paymentDetails }] = await Promise.all([
+    const [{ data: payments }, { data: paymentDetails }, { data: membership }] = await Promise.all([
       supabase.from("payment_confirmations").select("id,status,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1),
       supabase.from("payment_details").select("momo_name,momo_number,network,amount,instructions").maybeSingle(),
+      supabase.from("vip_memberships").select("approved_at").eq("user_id", user.id).maybeSingle(),
     ]);
     setPayment((payments?.[0] as Payment | undefined) ?? null);
     setDetails(paymentDetails ? ({ ...paymentDetails, amount: Number(paymentDetails.amount) } as Details) : null);
+    setApprovedAt(membership?.approved_at ?? null);
+
     if (isVip || isAdmin) {
       const { data } = await supabase.from("vip_predictions").select("id,title,bet_code,image_path,created_at").eq("is_active", true).order("created_at", { ascending: false });
       const withUrls = await Promise.all((data ?? []).map(async (item) => {
@@ -90,13 +95,18 @@ export default function VipPortal() {
   const amount = details?.amount ?? 50;
   const cedis = `GH₵${amount.toFixed(0)}`;
 
+  // Calculate remaining time in minutes
+  const remainingMins = approvedAt
+    ? Math.max(0, Math.ceil((new Date(approvedAt).getTime() + 60 * 60 * 1000 - Date.now()) / (60 * 1000)))
+    : 0;
+
   return (
     <main className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/70"><div className="container flex min-h-16 items-center justify-between gap-3 py-3"><Link to="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> Home</Link><div className="flex items-center gap-2"><Crown className="h-5 w-5 text-accent" /><span className="font-display font-bold">D’EXECUTIVE VIP</span></div><Button variant="ghost" size="sm" onClick={() => void signOut()}><LogOut className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Sign out</span></Button></div></header>
       <div className="container max-w-5xl py-10 md:py-16">
         {loading ? <div className="grid min-h-72 place-items-center"><LoaderCircle className="h-8 w-8 animate-spin text-primary" /></div> : isVip || isAdmin ? (
           <section>
-            <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><Badge className="mb-3 bg-primary/15 text-primary"><ShieldCheck className="mr-1 h-3 w-3" /> Access confirmed</Badge><h1 className="text-3xl font-bold md:text-4xl">VIP football predictions</h1><p className="mt-2 text-muted-foreground">Your latest paid selections and BET codes.</p></div>{isAdmin && <Button asChild variant="outline"><Link to="/admin">Open admin portal</Link></Button>}</div>
+            <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><Badge className="mb-3 bg-primary/15 text-primary"><ShieldCheck className="mr-1 h-3 w-3" /> 1-Hour VIP Access Active{!isAdmin && remainingMins > 0 ? ` (${remainingMins}m remaining)` : ""}</Badge><h1 className="text-3xl font-bold md:text-4xl">VIP football predictions</h1><p className="mt-2 text-muted-foreground">Your latest paid selections and BET codes.</p></div>{isAdmin && <Button asChild variant="outline"><Link to="/admin">Open admin portal</Link></Button>}</div>
             {predictions.length === 0 ? <div className="border-y border-border py-16 text-center"><Clock3 className="mx-auto mb-3 h-8 w-8 text-accent" /><h2 className="text-xl font-semibold">Next prediction coming soon</h2><p className="mt-2 text-sm text-muted-foreground">You have access. Check back for the next upload.</p></div> : <div className="grid gap-6 md:grid-cols-2">{predictions.map((item) => <article key={item.id} className="overflow-hidden rounded-lg border border-border bg-card"><div className="aspect-[4/3] bg-secondary">{item.imageUrl && <img src={item.imageUrl} alt={item.title} className="h-full w-full object-contain" />}</div><div className="p-5"><p className="text-xs text-muted-foreground">{new Date(item.created_at).toLocaleDateString("en-GH", { dateStyle: "medium" })}</p><h2 className="mt-1 text-xl font-bold">{item.title}</h2><div className="mt-4 flex items-center justify-between rounded-md border border-primary/30 bg-primary/10 px-4 py-3"><div><p className="text-xs uppercase text-muted-foreground">BET code</p><p className="text-lg font-bold text-primary">{item.bet_code}</p></div><Button size="icon" variant="ghost" aria-label="Copy BET code" onClick={() => void copyValue(item.id, item.bet_code)}>{copied === item.id ? <Check className="h-5 w-5 text-primary" /> : <Copy className="h-5 w-5" />}</Button></div></div></article>)}</div>}
           </section>
         ) : payment?.status === "pending" ? (
@@ -106,10 +116,15 @@ export default function VipPortal() {
         ) : !showPayment ? (
           <section className="mx-auto max-w-xl text-center">
             <Badge className="mb-4 bg-accent/15 text-accent">{cedis} VIP access</Badge>
-            <h1 className="text-3xl font-bold md:text-4xl">Unlock the VIP predictions</h1>
-            <p className="mt-3 text-muted-foreground">Pay {cedis} by Mobile Money to see the daily prediction picture and BET code.</p>
+            <h1 className="text-3xl font-bold md:text-4xl">Unlock VIP predictions</h1>
+            <p className="mt-3 text-muted-foreground">Pay {cedis} by Mobile Money to get 1 hour of full access to daily predictions and BET codes.</p>
+            {payment?.status === "approved" && !isVip && (
+              <p className="mt-4 rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-500 font-medium">
+                ⏰ Your 1-hour VIP pass has expired. Pay {cedis} by Mobile Money to unlock VIP predictions for another hour!
+              </p>
+            )}
             {payment?.status === "rejected" && <p className="mt-4 text-sm text-destructive">Your last confirmation was not verified. Please pay again and resubmit.</p>}
-            <Button size="lg" className="mt-8 w-full sm:w-auto" onClick={() => setShowPayment(true)}>Pay {cedis} — Unlock VIP</Button>
+            <Button size="lg" className="mt-8 w-full sm:w-auto" onClick={() => setShowPayment(true)}>Pay {cedis} — Unlock VIP (1 Hour)</Button>
           </section>
         ) : (
           <section className="mx-auto max-w-xl">

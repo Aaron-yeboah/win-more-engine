@@ -28,10 +28,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     const [{ data: roles }, { data: membership }] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", userId),
-      supabase.from("vip_memberships").select("active").eq("user_id", userId).maybeSingle(),
+      supabase.from("vip_memberships").select("active, approved_at").eq("user_id", userId).maybeSingle(),
     ]);
     const nextIsAdmin = Boolean(roles?.some((item) => item.role === "admin"));
-    const nextIsVip = Boolean(membership?.active);
+    
+    // VIP membership is active only for 1 hour (3600000 ms) after approval
+    const ONE_HOUR_MS = 60 * 60 * 1000;
+    const approvedAtMs = membership?.approved_at ? new Date(membership.approved_at).getTime() : 0;
+    const nextIsVip = Boolean(membership?.active && Date.now() - approvedAtMs < ONE_HOUR_MS);
+
     setIsAdmin(nextIsAdmin);
     setIsVip(nextIsVip);
     return { isAdmin: nextIsAdmin, isVip: nextIsVip };
@@ -49,11 +54,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(nextSession);
       window.setTimeout(() => void loadAccess(nextSession?.user.id).finally(() => setLoading(false)), 0);
     });
+
+    // Periodically re-check access every 30 seconds to automatically expire 1-hour VIP sessions
+    const interval = window.setInterval(() => {
+      if (session?.user?.id) {
+        void loadAccess(session.user.id);
+      }
+    }, 30000);
+
     return () => {
       mounted = false;
       listener.subscription.unsubscribe();
+      window.clearInterval(interval);
     };
-  }, []);
+  }, [session?.user?.id]);
 
   const value = useMemo<AuthContextValue>(() => ({
     user: session?.user ?? null,
