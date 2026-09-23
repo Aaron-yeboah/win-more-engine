@@ -55,17 +55,29 @@ export default function VipPortal() {
     if (!user) return;
     const parsed = nameSchema.safeParse(momoName);
     if (!parsed.success) return toast.error(parsed.error.issues[0]?.message);
+
+    // Use user's own phone number from their profile metadata as the momo_number
+    const userMomoNumber: string =
+      (user.user_metadata?.momo_number as string | undefined) ||
+      (user.user_metadata?.phone_number as string | undefined) ||
+      "000000000000";
+
     setSending(true);
     const { error } = await supabase.from("payment_confirmations").insert({
       user_id: user.id,
       momo_name: parsed.data,
-      momo_number: details?.momo_number ?? "",
+      momo_number: userMomoNumber,
       transaction_reference: "I HAVE PAID",
       amount: details?.amount ?? 50,
     });
     setSending(false);
-    if (error) return toast.error(error.code === "23505" ? "You already have a payment awaiting review" : "Your confirmation could not be sent");
-    toast.success("Sent — please wait for admin approval");
+    if (error) {
+      console.error("Payment submission error:", error);
+      if (error.code === "23505") return toast.error("You already have a payment awaiting review. Please wait for admin approval.");
+      if (error.code === "23514") return toast.error("Submission failed: your account profile is incomplete. Please contact support.");
+      return toast.error(`Could not send confirmation: ${error.message}`);
+    }
+    toast.success("Payment sent ✅ — please wait for admin approval");
     void load();
   };
 

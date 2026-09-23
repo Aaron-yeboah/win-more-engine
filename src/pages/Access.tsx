@@ -60,8 +60,16 @@ export default function Access() {
       options: { data: { full_name: validName.data, phone_number: normalized, momo_number: normalized } },
     });
     setBusy(false);
-    if (error) return toast.error(error.message.includes("already") ? "This phone number already has an account" : error.message);
-    toast.success("Account created successfully");
+    if (error) {
+      if (error.message.toLowerCase().includes("rate limit") || error.message.toLowerCase().includes("email rate")) {
+        return toast.error("Too many attempts. Please wait a few minutes and try again, or contact support.");
+      }
+      if (error.message.toLowerCase().includes("already")) {
+        return toast.error("This phone number already has an account. Try signing in instead.");
+      }
+      return toast.error(error.message);
+    }
+    toast.success("Account created! Welcome to D'EXECUTIVE VIP 🎉");
     navigate("/vip", { replace: true });
   };
 
