@@ -57,12 +57,16 @@ export default function AdminPortal() {
 
   const load = async () => {
     setLoading(true);
-    const [{ data: paymentRows }, { data: predictionRows }, { data: settings }, { data: payDetails }] = await Promise.all([
+    const [{ data: paymentRows, error: payErr }, { data: predictionRows }, { data: settings }, { data: payDetails }] = await Promise.all([
       supabase.from("payment_confirmations").select("*").order("created_at", { ascending: false }),
       supabase.from("vip_predictions").select("*").order("created_at", { ascending: false }),
       supabase.from("app_settings").select("dev_commission_percent").maybeSingle(),
       supabase.from("payment_details").select("*").maybeSingle(),
     ]);
+    if (payErr) {
+      console.error("Error loading payments:", payErr);
+      toast.error("Error loading payments: " + payErr.message);
+    }
     if (settings) {
       setCommission(Number(settings.dev_commission_percent));
       setCommissionInput(String(Number(settings.dev_commission_percent)));
@@ -92,7 +96,10 @@ export default function AdminPortal() {
     setBusyId(paymentId);
     const { error } = await supabase.rpc(action === "approve" ? "approve_payment" : "reject_payment", { _payment_id: paymentId });
     setBusyId(null);
-    if (error) return toast.error("The payment could not be updated");
+    if (error) {
+      console.error(`Error ${action}ing payment:`, error);
+      return toast.error("Could not update payment: " + error.message);
+    }
     toast.success(action === "approve" ? "VIP access granted" : "Payment rejected");
     void load();
   };
