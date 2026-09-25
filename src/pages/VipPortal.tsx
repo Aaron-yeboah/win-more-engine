@@ -73,7 +73,7 @@ export default function VipPortal() {
       momo_name: parsed.data,
       momo_number: userMomoNumber,
       transaction_reference: "I HAVE PAID",
-      amount: details?.amount ?? 50,
+      amount: details?.amount ?? 500,
     });
     setSending(false);
     if (error) {
@@ -92,7 +92,7 @@ export default function VipPortal() {
     window.setTimeout(() => setCopied(null), 1800);
   };
 
-  const amount = details?.amount ?? 50;
+  const amount = details?.amount ?? 500;
   const cedis = `GH₵${amount.toFixed(0)}`;
 
   // Calculate remaining time in minutes

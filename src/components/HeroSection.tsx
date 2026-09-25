@@ -47,7 +47,7 @@ const HeroSection = () => {
             <Button asChild size="lg" variant="outline" className="text-lg px-8 py-6 font-display font-semibold border-accent text-accent hover:bg-accent/10 glow-gold cursor-pointer">
               <Link to="/access">
                 <Trophy className="mr-2 h-5 w-5" />
-                Go VIP — GH₵50
+                Go VIP — GH₵500
               </Link>
             </Button>
           </div>

@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 const plans = [
   {
     name: "VIP Access",
-    price: "GH₵50",
+    price: "GH₵500",
     period: "",
     icon: Crown,
     features: ["All VIP tips", "Booking codes included", "Telegram VIP group", "Priority support", "Early access to picks"],
@@ -22,7 +22,7 @@ const VipPricing = () => {
           <h2 className="text-3xl md:text-4xl font-bold font-display mb-2">
             Unlock <span className="text-gradient-gold">VIP Access</span>
           </h2>
-          <p className="text-muted-foreground">Pay GH₵50 to unlock all VIP tips</p>
+          <p className="text-muted-foreground">Pay GH₵500 to unlock all VIP tips</p>
         </div>
 
         <div className="flex justify-center max-w-md mx-auto">
@@ -61,7 +61,7 @@ const VipPricing = () => {
               <Button asChild
                 className="w-full font-display font-semibold bg-accent text-accent-foreground hover:bg-accent/90"
               >
-                <Link to="/access">Pay GH₵50 — Unlock VIP</Link>
+                <Link to="/access">Pay GH₵500 — Unlock VIP</Link>
               </Button>
             </motion.div>
           ))}

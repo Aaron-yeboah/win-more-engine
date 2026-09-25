@@ -30,7 +30,7 @@ export default function AdminPortal() {
   const [payName, setPayName] = useState("");
   const [payNumber, setPayNumber] = useState("");
   const [payNetwork, setPayNetwork] = useState("MTN");
-  const [payAmount, setPayAmount] = useState("50");
+  const [payAmount, setPayAmount] = useState("500");
   const [payNote, setPayNote] = useState("");
   const [savingDetails, setSavingDetails] = useState(false);
 

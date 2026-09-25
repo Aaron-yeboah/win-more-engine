@@ -43,7 +43,7 @@ CREATE TABLE public.payment_confirmations (
   momo_name text NOT NULL CHECK (char_length(momo_name) BETWEEN 2 AND 100),
   momo_number text NOT NULL CHECK (momo_number ~ '^233[0-9]{9}$'),
   transaction_reference text NOT NULL CHECK (char_length(transaction_reference) BETWEEN 4 AND 80),
-  amount numeric(10,2) NOT NULL DEFAULT 50 CHECK (amount = 50),
+  amount numeric(10,2) NOT NULL DEFAULT 500 CHECK (amount > 0),
   status public.payment_status NOT NULL DEFAULT 'pending',
   reviewed_by uuid,
   reviewed_at timestamptz,

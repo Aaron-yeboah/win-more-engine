@@ -3,7 +3,7 @@ CREATE TABLE public.payment_details (
   momo_name text NOT NULL DEFAULT '',
   momo_number text NOT NULL DEFAULT '',
   network text NOT NULL DEFAULT 'MTN',
-  amount numeric NOT NULL DEFAULT 50,
+  amount numeric NOT NULL DEFAULT 500,
   instructions text NOT NULL DEFAULT '',
   updated_by uuid,
   updated_at timestamptz NOT NULL DEFAULT now()
